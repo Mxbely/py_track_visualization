@@ -9,7 +9,7 @@ app = Dash(__name__, suppress_callback_exceptions=True)
 
 
 def get_file_list():
-    response = requests.get("http://127.0.0.1:8000/api/tracks/files/")
+    response = requests.get("http://django:8000/api/tracks/files/")
     if response.status_code == 200:
         print("file_list", response.json())
         return response.json()
@@ -18,7 +18,7 @@ def get_file_list():
 
 def get_track_points(file_name):
     response = requests.get(
-        f"http://127.0.0.1:8000/api/tracks/?file_name={file_name}"
+        f"http://django:8000/api/tracks/?file_name={file_name}"
     )
     if response.status_code == 200:
         return response.json()
@@ -81,25 +81,27 @@ def parse_contents(contents):
     Output("file-dropdown", "options", allow_duplicate=True),
     Input("upload-data", "filename"),
     Input("upload-data", "contents"),
-    prevent_initial_call='initial_duplicate',
+    prevent_initial_call="initial_duplicate",
 )
 def upload_file(filename, contents):
     if not contents or not filename:
-        return "", []
+        file_list = get_file_list()
+        print(file_list)
+        dropdown_options = [{"label": f, "value": f} for f in file_list]
+        return "Upload your file", dropdown_options
 
     file_io = parse_contents(contents)
     files = {"file": (filename, file_io, "application/csv")}
 
     try:
         response = requests.post(
-            "http://127.0.0.1:8000/api/tracks/upload/", files=files
+            "http://django:8000/api/tracks/upload/", files=files
         )
-        dropdown_options = []
-        if response.status_code == 201:
-            file_list = get_file_list()
-            print(file_list)
-            dropdown_options = [{"label": f, "value": f} for f in file_list]
+        file_list = get_file_list()
+        print(file_list)
+        dropdown_options = [{"label": f, "value": f} for f in file_list]
 
+        if response.status_code == 201:
             return "File uploaded successfully!", dropdown_options
 
         elif response.status_code == 409:
@@ -112,14 +114,14 @@ def upload_file(filename, contents):
 
 
 @app.callback(
-        Output("file-dropdown", "options", allow_duplicate=True), 
-        Input("file-dropdown", "id"),
-        prevent_initial_call='initial_duplicate',
-    )
+    Output("file-dropdown", "options"),
+    Input("file-dropdown", "id"),
+    prevent_initial_call=True,
+)
 def load_existing_files(_):
     file_list = get_file_list()
     return [{"label": f, "value": f} for f in file_list]
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, host="0.0.0.0")
