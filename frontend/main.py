@@ -5,24 +5,28 @@ import io
 from dash.dependencies import Input, Output
 import requests
 
+MAIN_URL = "http://django:8000/api/tracks/"
+
 app = Dash(__name__, suppress_callback_exceptions=True)
 
 
 def get_file_list():
-    response = requests.get("http://django:8000/api/tracks/files/")
+    response = requests.get(f"{MAIN_URL}files/")
     if response.status_code == 200:
-        print("file_list", response.json())
         return response.json()
     return []
 
 
 def get_track_points(file_name):
-    response = requests.get(
-        f"http://django:8000/api/tracks/?file_name={file_name}"
-    )
+    response = requests.get(f"{MAIN_URL}?file_name={file_name}")
     if response.status_code == 200:
         return response.json()
     return []
+
+
+def get_all_list_options():
+    file_list = get_file_list()
+    return [{"label": f, "value": f} for f in file_list]
 
 
 app.layout = html.Div(
@@ -70,8 +74,6 @@ def update_map(selected_file):
 
 def parse_contents(contents):
     content_type, content_string = contents.split(",")
-    print("content_type", content_type)
-    print("content_string", content_string)
     decoded = base64.b64decode(content_string)
     return io.BytesIO(decoded)
 
@@ -85,21 +87,14 @@ def parse_contents(contents):
 )
 def upload_file(filename, contents):
     if not contents or not filename:
-        file_list = get_file_list()
-        print(file_list)
-        dropdown_options = [{"label": f, "value": f} for f in file_list]
-        return "Upload your file", dropdown_options
+        return "Upload your file", get_all_list_options()
 
     file_io = parse_contents(contents)
     files = {"file": (filename, file_io, "application/csv")}
 
     try:
-        response = requests.post(
-            "http://django:8000/api/tracks/upload/", files=files
-        )
-        file_list = get_file_list()
-        print(file_list)
-        dropdown_options = [{"label": f, "value": f} for f in file_list]
+        response = requests.post(f"{MAIN_URL}upload/", files=files)
+        dropdown_options = get_all_list_options()
 
         if response.status_code == 201:
             return "File uploaded successfully!", dropdown_options
@@ -119,8 +114,7 @@ def upload_file(filename, contents):
     prevent_initial_call=True,
 )
 def load_existing_files(_):
-    file_list = get_file_list()
-    return [{"label": f, "value": f} for f in file_list]
+    return get_all_list_options()
 
 
 if __name__ == "__main__":
