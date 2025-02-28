@@ -1,0 +1,66 @@
+services:
+  django:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: >
+      sh -c "
+        poetry run python backend/manage.py makemigrations &&
+        poetry run python backend/manage.py migrate &&
+        poetry run python backend/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app/backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - traks_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  dash:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - ./frontend:/app/frontend
+    ports:
+      - "8050:8050"
+    depends_on:
+      - django
+    networks:
+      - traks_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8050"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  db:
+    image: postgres:latest
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - traks_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+volumes:
+  postgres_data:
+networks:
+  traks_network:
+    driver: bridge
