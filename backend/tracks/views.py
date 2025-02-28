@@ -59,7 +59,7 @@ class TrackUploadView(APIView):
         TrackPoint.objects.bulk_create(points)
 
         return Response(
-            {"message": "File processed and data saved"}, status=201
+            {"message": "File data saved"}, status=201
         )
 
 
@@ -82,7 +82,7 @@ class TrackPointListView(APIView):
         file_name = request.query_params.get("file_name")
         track_points = TrackPoint.objects.filter(file_name=file_name)
         serializer = TrackPointSerializer(track_points, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=200)
 
 
 class FileListView(APIView):
@@ -96,4 +96,4 @@ class FileListView(APIView):
         file_names = TrackPoint.objects.values_list(
             "file_name", flat=True
         ).distinct()
-        return Response(file_names)
+        return Response(file_names, status=200)
