@@ -33,3 +33,7 @@ docker-compose up --build
 Dash application will be availabla by `127.0.0.1:8050`
 
 API will be avaliable by `127.0.0.1:8000`
+
+## Documentation
+
+Swagger documentation will be available by `127.0.0.1:8000/api/schema/swagger/`
