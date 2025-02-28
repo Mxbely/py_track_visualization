@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import TrackPoint
+from tracks.models import TrackPoint
+
 
 class TrackPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrackPoint
-        fields = "__all__"
+        fields = ("id", "point_x", "point_y", "file_name")
