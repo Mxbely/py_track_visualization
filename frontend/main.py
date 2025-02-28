@@ -1,33 +1,15 @@
 import dash_leaflet as dl
 from dash import Dash, html, dcc
-import base64
-import io
 from dash.dependencies import Input, Output
-import requests
+from utils import (
+    get_track_points,
+    get_all_list_options,
+    update_files,
+    parse_contents,
+)
 
-MAIN_URL = "http://django:8000/api/tracks/"
 
 app = Dash(__name__, suppress_callback_exceptions=True)
-
-
-def get_file_list():
-    response = requests.get(f"{MAIN_URL}files/")
-    if response.status_code == 200:
-        return response.json()
-    return []
-
-
-def get_track_points(file_name):
-    response = requests.get(f"{MAIN_URL}?file_name={file_name}")
-    if response.status_code == 200:
-        return response.json()
-    return []
-
-
-def get_all_list_options():
-    file_list = get_file_list()
-    return [{"label": f, "value": f} for f in file_list]
-
 
 app.layout = html.Div(
     [
@@ -72,12 +54,6 @@ def update_map(selected_file):
     return [dl.TileLayer(), polyline]
 
 
-def parse_contents(contents):
-    content_type, content_string = contents.split(",")
-    decoded = base64.b64decode(content_string)
-    return io.BytesIO(decoded)
-
-
 @app.callback(
     Output("upload-status", "children"),
     Output("file-dropdown", "options", allow_duplicate=True),
@@ -93,7 +69,7 @@ def upload_file(filename, contents):
     files = {"file": (filename, file_io, "application/csv")}
 
     try:
-        response = requests.post(f"{MAIN_URL}upload/", files=files)
+        response = update_files(files)
         dropdown_options = get_all_list_options()
 
         if response.status_code == 201:

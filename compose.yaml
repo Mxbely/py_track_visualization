@@ -51,7 +51,7 @@ services:
     env_file:
       - .env
     volumes:
-      - postgres_data:$PGDATA
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - traks_network
     healthcheck:

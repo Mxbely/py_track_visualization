@@ -29,3 +29,7 @@ Use next command for run project:
 ```bash
 docker-compose up --build
 ```
+### Step 3
+Dash application will be availabla by `127.0.0.1:8050`
+
+API will be avaliable by `127.0.0.1:8000`
