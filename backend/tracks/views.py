@@ -1,28 +1,33 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
+import csv
+from io import TextIOWrapper
+
+from drf_spectacular.utils import (
+    OpenApiParameter, 
+    OpenApiResponse,
+    extend_schema
+)
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
-from drf_spectacular.types import OpenApiTypes
+from rest_framework.request import Request
+from rest_framework.views import APIView
+
 from .models import TrackPoint
 from .serializers import TrackPointSerializer
-from io import TextIOWrapper
-import csv
 
 
 class TrackUploadView(APIView):
-    parser_classes = (MultiPartParser, FormParser)
-
     @extend_schema(
         description="Upload CSV file with track points",
         request={"data": {"file": "binary"}},
         responses={
             201: OpenApiResponse(description="File data saved"),
             400: OpenApiResponse(description="No file uploaded"),
-            409: OpenApiResponse(description="File with this name already exists"),
-        }
+            409: OpenApiResponse(
+                description="File with this name already exists"
+            ),
+        },
     )
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         file = request.FILES.get("file")
 
         if not file:
@@ -73,7 +78,7 @@ class TrackPointListView(APIView):
             200: TrackPointSerializer(many=True),
         },
     )
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         file_name = request.query_params.get("file_name")
         track_points = TrackPoint.objects.filter(file_name=file_name)
         serializer = TrackPointSerializer(track_points, many=True)
@@ -87,6 +92,8 @@ class FileListView(APIView):
             200: OpenApiResponse(description="List of file names"),
         },
     )
-    def get(self, request):
-        file_names = TrackPoint.objects.values_list("file_name", flat=True).distinct()
+    def get(self, request: Request) -> Response:
+        file_names = TrackPoint.objects.values_list(
+            "file_name", flat=True
+        ).distinct()
         return Response(file_names)

@@ -15,7 +15,9 @@ dependencies = [
     "dash (>=2.18.2,<3.0.0)",
     "dash-leaflet (>=1.0.15,<2.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "drf-spectacular (>=0.28.0,<0.29.0)"
+    "drf-spectacular (>=0.28.0,<0.29.0)",
+    "ruff (>=0.9.8,<0.10.0)",
+    "isort (>=6.0.1,<7.0.0)"
 ]
 
 

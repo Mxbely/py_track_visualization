@@ -1,13 +1,14 @@
+from typing import Any
+
 import dash_leaflet as dl
-from dash import Dash, html, dcc
+from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
 from utils import (
-    get_track_points,
     get_all_list_options,
-    update_files,
+    get_track_points,
     parse_contents,
+    update_files,
 )
-
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -37,7 +38,7 @@ app.layout = html.Div(
 
 
 @app.callback(Output("map", "children"), Input("file-dropdown", "value"))
-def update_map(selected_file):
+def update_map(selected_file: str) -> list:
     if not selected_file:
         return [dl.TileLayer()]
 
@@ -61,7 +62,7 @@ def update_map(selected_file):
     Input("upload-data", "contents"),
     prevent_initial_call="initial_duplicate",
 )
-def upload_file(filename, contents):
+def upload_file(filename: str, contents: str) -> tuple:
     if not contents or not filename:
         return "Upload your file", get_all_list_options()
 
@@ -89,7 +90,7 @@ def upload_file(filename, contents):
     Input("file-dropdown", "id"),
     prevent_initial_call=True,
 )
-def load_existing_files(_):
+def load_existing_files(*args: Any) -> list:
     return get_all_list_options()
 
 
