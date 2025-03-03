@@ -8,4 +8,3 @@ class TrackPoint(models.Model):
 
     def __str__(self):
         return f"{self.point_x}, {self.point_y} ({self.file_name})"
-
