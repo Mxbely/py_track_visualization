@@ -2,9 +2,9 @@ import csv
 from io import TextIOWrapper
 
 from drf_spectacular.utils import (
-    OpenApiParameter, 
+    OpenApiParameter,
     OpenApiResponse,
-    extend_schema
+    extend_schema,
 )
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
@@ -58,9 +58,7 @@ class TrackUploadView(APIView):
 
         TrackPoint.objects.bulk_create(points)
 
-        return Response(
-            {"message": "File data saved"}, status=201
-        )
+        return Response({"message": "File data saved"}, status=201)
 
 
 class TrackPointListView(APIView):

@@ -30,10 +30,20 @@ Use next command for run project:
 docker-compose up --build
 ```
 ### Step 3
-Dash application will be availabla by `127.0.0.1:8050`
+Dash application will be available by `127.0.0.1:8050`
 
-API will be avaliable by `127.0.0.1:8000`
+API will be available by `127.0.0.1:8000`
 
 ## Documentation
 
 Swagger documentation will be available by `127.0.0.1:8000/api/schema/swagger/`
+
+## Tests
+
+For run tests, start docker -> open new terminal and use next command
+```bash
+docker exec -it py_track_visualization-django-1 sh -c "cd backend && poetry run python manage.py test"
+```
+where `py_track_visualization-django-1` - container name
+
+P.S. If you have other container name, you can see it by `docker ps` command
